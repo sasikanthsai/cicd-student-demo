@@ -1,14 +1,1146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CI/CD Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CI/CD Student Dashboard</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:#050816;
+    color:#f5f7ff;
+    overflow-x:hidden;
+}
+
+/* BACKGROUND */
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at 10% 20%,rgba(0,229,255,.13),transparent 30%),
+        radial-gradient(circle at 90% 10%,rgba(124,58,237,.18),transparent 30%),
+        radial-gradient(circle at 50% 90%,rgba(16,185,129,.10),transparent 30%);
+    pointer-events:none;
+    z-index:-2;
+}
+
+.grid{
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:50px 50px;
+    pointer-events:none;
+    z-index:-1;
+}
+
+/* NAVBAR */
+
+nav{
+    position:sticky;
+    top:0;
+    z-index:100;
+    backdrop-filter:blur(18px);
+    background:rgba(5,8,22,.72);
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.nav-inner{
+    max-width:1200px;
+    margin:auto;
+    padding:18px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.logo span{
+    color:#00e5ff;
+}
+
+nav a{
+    color:#b9c2d8;
+    text-decoration:none;
+    margin-left:25px;
+    font-size:14px;
+    transition:.3s;
+}
+
+nav a:hover{
+    color:#00e5ff;
+}
+
+/* HERO */
+
+.hero{
+    max-width:1200px;
+    margin:auto;
+    padding:110px 25px 80px;
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:60px;
+    align-items:center;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 14px;
+    border-radius:30px;
+    background:rgba(16,185,129,.10);
+    border:1px solid rgba(16,185,129,.35);
+    color:#6ee7b7;
+    font-size:13px;
+    margin-bottom:25px;
+}
+
+.dot{
+    width:8px;
+    height:8px;
+    background:#22c55e;
+    border-radius:50%;
+    box-shadow:0 0 15px #22c55e;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        opacity:.35;
+        transform:scale(.7);
+    }
+}
+
+.hero h1{
+    font-size:clamp(45px,6vw,78px);
+    line-height:1;
+    letter-spacing:-4px;
+    margin-bottom:25px;
+}
+
+.gradient{
+    background:linear-gradient(90deg,#00e5ff,#7c3aed,#22c55e);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.hero p{
+    color:#9ca8c0;
+    font-size:18px;
+    line-height:1.8;
+    max-width:650px;
+}
+
+.buttons{
+    display:flex;
+    gap:15px;
+    margin-top:35px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:14px 22px;
+    border-radius:12px;
+    text-decoration:none;
+    font-weight:700;
+    transition:.3s;
+}
+
+.btn-primary{
+    background:linear-gradient(135deg,#00e5ff,#6366f1);
+    color:white;
+    box-shadow:0 10px 35px rgba(0,229,255,.2);
+}
+
+.btn-secondary{
+    border:1px solid rgba(255,255,255,.15);
+    color:white;
+    background:rgba(255,255,255,.04);
+}
+
+.btn:hover{
+    transform:translateY(-3px);
+}
+
+/* PIPELINE VISUAL */
+
+.pipeline-card{
+    padding:30px;
+    border-radius:25px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 30px 80px rgba(0,0,0,.35);
+}
+
+.pipeline-title{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:25px;
+}
+
+.status{
+    color:#4ade80;
+    font-size:13px;
+}
+
+.pipeline{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.stage{
+    width:100px;
+    height:100px;
+    border-radius:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:#0c1225;
+    border:1px solid rgba(255,255,255,.1);
+    transition:.3s;
+}
+
+.stage:hover{
+    transform:translateY(-8px);
+    border-color:#00e5ff;
+    box-shadow:0 15px 40px rgba(0,229,255,.15);
+}
+
+.stage-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.stage small{
+    color:#9ca8c0;
+}
+
+.arrow{
+    color:#00e5ff;
+    font-size:25px;
+}
+
+/* SECTION */
+
+section{
+    max-width:1200px;
+    margin:auto;
+    padding:80px 25px;
+}
+
+.section-heading{
+    margin-bottom:45px;
+}
+
+.section-heading span{
+    color:#00e5ff;
+    font-size:13px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:3px;
+}
+
+.section-heading h2{
+    font-size:42px;
+    margin-top:10px;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+}
+
+.stat{
+    padding:30px;
+    border-radius:20px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.stat-icon{
+    font-size:25px;
+}
+
+.stat h3{
+    font-size:38px;
+    margin:15px 0 5px;
+}
+
+.stat p{
+    color:#8793aa;
+}
+
+/* FEATURE CARDS */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.card{
+    padding:30px;
+    border-radius:22px;
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,.025)
+    );
+    border:1px solid rgba(255,255,255,.08);
+    transition:.35s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    border-color:rgba(0,229,255,.35);
+}
+
+.card-icon{
+    width:55px;
+    height:55px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+    background:rgba(0,229,255,.08);
+    margin-bottom:20px;
+}
+
+.card h3{
+    margin-bottom:12px;
+    font-size:21px;
+}
+
+.card p{
+    color:#8d99b0;
+    line-height:1.7;
+}
+
+/* ARCHITECTURE */
+
+.architecture{
+    padding:35px;
+    border-radius:25px;
+    background:#080d20;
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.arch-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.arch-box{
+    padding:20px 25px;
+    border-radius:15px;
+    background:#10182e;
+    border:1px solid rgba(0,229,255,.2);
+    text-align:center;
+    min-width:150px;
+}
+
+.arch-box strong{
+    display:block;
+    margin-bottom:7px;
+}
+
+.arch-box small{
+    color:#7f8ba5;
+}
+
+.arch-arrow{
+    color:#00e5ff;
+    font-size:25px;
+}
+
+/* TERMINAL */
+
+.terminal{
+    border-radius:20px;
+    overflow:hidden;
+    background:#03050c;
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+.terminal-head{
+    padding:14px 18px;
+    background:#101522;
+    display:flex;
+    gap:7px;
+}
+
+.circle{
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    background:#475569;
+}
+
+.terminal-body{
+    padding:25px;
+    font-family:Consolas,monospace;
+    color:#94f7c5;
+    line-height:2;
+}
+
+.command{
+    color:#00e5ff;
+}
+
+.success{
+    color:#4ade80;
+}
+
+/* DEPLOYMENT */
+
+.deploy-box{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+
+.deploy-card{
+    padding:35px;
+    border-radius:23px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.deploy-line{
+    display:flex;
+    justify-content:space-between;
+    padding:17px 0;
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.deploy-line:last-child{
+    border:none;
+}
+
+.green{
+    color:#4ade80;
+}
+
+/* TECHNOLOGIES */
+
+.techs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.tech{
+    padding:13px 20px;
+    border-radius:30px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:#cbd5e1;
+}
+
+/* FOOTER */
+
+footer{
+    border-top:1px solid rgba(255,255,255,.08);
+    padding:40px 25px;
+    text-align:center;
+    color:#64748b;
+}
+
+footer strong{
+    color:#00e5ff;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    .hero{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .deploy-box{
+        grid-template-columns:1fr;
+    }
+
+    nav .links{
+        display:none;
+    }
+}
+
+@media(max-width:550px){
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .hero{
+        padding-top:70px;
+    }
+
+    .hero h1{
+        letter-spacing:-2px;
+    }
+}
+
+</style>
 </head>
+
 <body>
-    <h1>Student CI/CD Demonstration</h1>
-    <h2>Deployment Successful</h2>
-    <p>This webpage was deployed automatically using GitHub Actions.</p>
-    <p>Application Status: Running</p>
+
+<div class="grid"></div>
+
+<!-- NAVIGATION -->
+
+<nav>
+
+<div class="nav-inner">
+
+<div class="logo">
+⚡ <span>CI/CD</span> Student Lab
+</div>
+
+<div class="links">
+<a href="#pipeline">Pipeline</a>
+<a href="#architecture">Architecture</a>
+<a href="#deployment">Deployment</a>
+<a href="#technology">Technology</a>
+</div>
+
+</div>
+
+</nav>
+
+
+<!-- HERO -->
+
+<header class="hero">
+
+<div>
+
+<div class="badge">
+<div class="dot"></div>
+LIVE DEPLOYMENT • OPERATIONAL
+</div>
+
+<h1>
+Student
+<span class="gradient">CI/CD</span>
+Platform
+</h1>
+
+<p>
+A complete Continuous Integration and Continuous Deployment
+demonstration powered by GitHub Actions, automated testing,
+and GitHub Pages.
+</p>
+
+<div class="buttons">
+
+<a class="btn btn-primary"
+href="https://github.com/sasikanthsai/cicd-student-demo"
+target="_blank">
+View GitHub Repository →
+</a>
+
+<a class="btn btn-secondary"
+href="https://github.com/sasikanthsai/cicd-student-demo/actions"
+target="_blank">
+View Actions
+</a>
+
+</div>
+
+</div>
+
+
+<!-- PIPELINE -->
+
+<div class="pipeline-card" id="pipeline">
+
+<div class="pipeline-title">
+
+<strong>Production Pipeline</strong>
+
+<span class="status">● ALL SYSTEMS GO</span>
+
+</div>
+
+<div class="pipeline">
+
+<div class="stage">
+<div class="stage-icon">📦</div>
+<strong>Push</strong>
+<small>GitHub</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="stage">
+<div class="stage-icon">🧪</div>
+<strong>Test</strong>
+<small>PyTest</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="stage">
+<div class="stage-icon">⚙️</div>
+<strong>Build</strong>
+<small>Actions</small>
+</div>
+
+<div class="arrow">→</div>
+
+<div class="stage">
+<div class="stage-icon">🚀</div>
+<strong>Deploy</strong>
+<small>Pages</small>
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+
+<!-- STATS -->
+
+<section>
+
+<div class="section-heading">
+
+<span>System Overview</span>
+
+<h2>Pipeline at a glance</h2>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">
+
+<div class="stat-icon">🔄</div>
+
+<h3>100%</h3>
+
+<p>Automated Pipeline</p>
+
+</div>
+
+<div class="stat">
+
+<div class="stat-icon">🧪</div>
+
+<h3>PASS</h3>
+
+<p>Automated Tests</p>
+
+</div>
+
+<div class="stat">
+
+<div class="stat-icon">☁️</div>
+
+<h3>LIVE</h3>
+
+<p>Production Deployment</p>
+
+</div>
+
+<div class="stat">
+
+<div class="stat-icon">⚡</div>
+
+<h3>24/7</h3>
+
+<p>Deployment Ready</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FEATURES -->
+
+<section>
+
+<div class="section-heading">
+
+<span>Capabilities</span>
+
+<h2>What this project demonstrates</h2>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<div class="card-icon">🧪</div>
+
+<h3>Continuous Integration</h3>
+
+<p>
+Every push to the main branch automatically
+installs dependencies and executes the Python
+test suite using PyTest.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">🚀</div>
+
+<h3>Continuous Deployment</h3>
+
+<p>
+Deployment runs only after CI succeeds.
+The website is automatically published through
+GitHub Pages.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">🛡️</div>
+
+<h3>Failure Protection</h3>
+
+<p>
+If automated tests fail, the deployment stage
+is skipped. This prevents defective changes
+from reaching production.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">🔁</div>
+
+<h3>Automated Workflow</h3>
+
+<p>
+The entire process runs through GitHub Actions
+without requiring manual deployment steps.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">📊</div>
+
+<h3>Pipeline Monitoring</h3>
+
+<p>
+Workflow execution, test results, deployment
+status and artifacts can be monitored directly
+from GitHub Actions.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-icon">🌐</div>
+
+<h3>Live Production</h3>
+
+<p>
+The final application is available publicly
+through GitHub Pages after successful deployment.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ARCHITECTURE -->
+
+<section id="architecture">
+
+<div class="section-heading">
+
+<span>Architecture</span>
+
+<h2>How the pipeline works</h2>
+
+</div>
+
+<div class="architecture">
+
+<div class="arch-row">
+
+<div class="arch-box">
+
+<strong>👨‍💻 Developer</strong>
+
+<small>Code Change</small>
+
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+
+<strong>🐙 GitHub</strong>
+
+<small>Push to main</small>
+
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+
+<strong>⚙️ GitHub Actions</strong>
+
+<small>CI Pipeline</small>
+
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+
+<strong>🧪 PyTest</strong>
+
+<small>Validation</small>
+
+</div>
+
+<div class="arch-arrow">→</div>
+
+<div class="arch-box">
+
+<strong>🚀 Deploy</strong>
+
+<small>GitHub Pages</small>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- TERMINAL -->
+
+<section>
+
+<div class="section-heading">
+
+<span>Execution Log</span>
+
+<h2>Live deployment activity</h2>
+
+</div>
+
+<div class="terminal">
+
+<div class="terminal-head">
+
+<div class="circle"></div>
+<div class="circle"></div>
+<div class="circle"></div>
+
+</div>
+
+<div class="terminal-body">
+
+<div><span class="command">$</span> git push origin main</div>
+
+<div>Uploading source code...</div>
+
+<div class="success">✓ Source code received</div>
+
+<div><span class="command">$</span> pytest -v</div>
+
+<div class="success">✓ Automated tests passed</div>
+
+<div><span class="command">$</span> configure-pages</div>
+
+<div class="success">✓ GitHub Pages configured</div>
+
+<div><span class="command">$</span> deploy-pages</div>
+
+<div class="success">✓ Deployment successful</div>
+
+<div class="success">✓ Production environment is LIVE</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DEPLOYMENT -->
+
+<section id="deployment">
+
+<div class="section-heading">
+
+<span>Deployment</span>
+
+<h2>Production environment</h2>
+
+</div>
+
+<div class="deploy-box">
+
+<div class="deploy-card">
+
+<h3>🚀 Deployment Status</h3>
+
+<br>
+
+<div class="deploy-line">
+
+<span>Environment</span>
+
+<strong class="green">Production</strong>
+
+</div>
+
+<div class="deploy-line">
+
+<span>Platform</span>
+
+<strong>GitHub Pages</strong>
+
+</div>
+
+<div class="deploy-line">
+
+<span>Pipeline</span>
+
+<strong class="green">Healthy</strong>
+
+</div>
+
+<div class="deploy-line">
+
+<span>CI Tests</span>
+
+<strong class="green">Passing</strong>
+
+</div>
+
+<div class="deploy-line">
+
+<span>Deployment</span>
+
+<strong class="green">Successful</strong>
+
+</div>
+
+</div>
+
+
+<div class="deploy-card">
+
+<h3>🌐 Live Application</h3>
+
+<br>
+
+<p style="color:#8d99b0;line-height:1.8">
+
+This website is automatically deployed whenever
+changes are pushed to the main branch and all
+automated tests pass.
+
+</p>
+
+<br>
+
+<a class="btn btn-primary"
+href="https://sasikanthsai.github.io/cicd-student-demo/"
+target="_blank">
+Open Production →
+</a>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- TECHNOLOGIES -->
+
+<section id="technology">
+
+<div class="section-heading">
+
+<span>Technology Stack</span>
+
+<h2>Tools used in this project</h2>
+
+</div>
+
+<div class="techs">
+
+<div class="tech">🐙 GitHub</div>
+
+<div class="tech">⚙️ GitHub Actions</div>
+
+<div class="tech">🐍 Python</div>
+
+<div class="tech">🧪 PyTest</div>
+
+<div class="tech">🌐 HTML5</div>
+
+<div class="tech">🎨 CSS3</div>
+
+<div class="tech">☁️ GitHub Pages</div>
+
+<div class="tech">🔄 CI/CD</div>
+
+</div>
+
+</section>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+<p>
+Built as a <strong>CI/CD Engineering Demonstration</strong>
+</p>
+
+<br>
+
+<p>
+Automated • Tested • Deployed • Production Ready
+</p>
+
+<br>
+
+<p>
+© 2026 Sasi Kanth Sai
+</p>
+
+</footer>
+
+
+<script>
+
+/* Animated counters */
+
+const counters = document.querySelectorAll(".stat h3");
+
+counters.forEach(counter => {
+
+    counter.style.opacity = "0";
+
+    setTimeout(() => {
+
+        counter.style.transition = "1s";
+
+        counter.style.opacity = "1";
+
+    },300);
+
+});
+
+
+/* Pipeline animation */
+
+const stages = document.querySelectorAll(".stage");
+
+stages.forEach((stage,index) => {
+
+    setTimeout(() => {
+
+        stage.style.boxShadow =
+        "0 0 30px rgba(0,229,255,.18)";
+
+        setTimeout(() => {
+
+            stage.style.boxShadow = "none";
+
+        },700);
+
+    }, index * 500);
+
+});
+
+
+/* Live clock */
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.title =
+    "CI/CD Dashboard • " +
+    now.toLocaleTimeString();
+
+}
+
+setInterval(updateClock,1000);
+
+</script>
+
 </body>
 </html>
